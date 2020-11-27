@@ -1,8 +1,8 @@
 const http = require('http');
-const port = process.env.PORT
+const PORT = process.env.PORT
+const SERVER_PORT = 74.119.146.38
 
 const server = http.createServer();
-const PORT = 7000;
 server.on('request', HandleRequest)
 server.listen(PORT, ListenStart);
 
@@ -85,7 +85,7 @@ function SendTheClientRequestToMainServer(originalRequest, originalResponse, bod
     let length = originalRequest.length + body.length
     let options = {
         hostname: 'localhost',
-        port: '7001',
+        port: `${SERVER_PORT}`,
         method: 'POST',
         path: '/',
         headers: { "content-length": length }
