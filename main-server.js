@@ -1,7 +1,10 @@
 const PORT = process.env.PORT
+
+
 const http = require('http')
 // const https = require("https")
 const server = http.createServer();
+//const PORT = 7001;
 const subtle = require('crypto').webcrypto.subtle
 
 server.on('request', HandleRequest)
@@ -156,7 +159,7 @@ function StringToTypedArray(responseToSend) {
     for (let i = 0; i < responseToSend.length; i++) {
         array[i] = responseToSend.charCodeAt(i)
     }
-    console.log(array.length, typeof array, "this is the converted string to array")
+    // console.log(array.length, typeof array, "this is the converted string to array")
     return array;
 }
 function ConverArrayBufferToString(decrypted) {
