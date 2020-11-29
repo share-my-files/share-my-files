@@ -9,7 +9,7 @@ const subtle = require('crypto').webcrypto.subtle
 
 server.on('request', HandleRequest)
 server.listen(PORT, ListenStart);
-let INITIAL_API_ADDRESS = "https://e3db285c3243.ngrok.io"
+let INITIAL_API_ADDRESS = process.env.ADDRESS
 const API_ADDRESS_HOST = INITIAL_API_ADDRESS.substr(8, INITIAL_API_ADDRESS.length)
 console.log(API_ADDRESS_HOST)
 
