@@ -1,15 +1,14 @@
 const PORT = process.env.PORT
+let INITIAL_API_ADDRESS = process.env.ADDRESS
 
 
 const http = require('http')
 // const https = require("https")
 const server = http.createServer();
-//const PORT = 7001;
 const subtle = require('crypto').webcrypto.subtle
 
 server.on('request', HandleRequest)
 server.listen(PORT, ListenStart);
-let INITIAL_API_ADDRESS = process.env.ADDRESS
 const API_ADDRESS_HOST = INITIAL_API_ADDRESS.substr(8, INITIAL_API_ADDRESS.length)
 console.log(API_ADDRESS_HOST)
 
@@ -23,7 +22,7 @@ let rawHekoPublicKey = JSON.stringify({
     alg: 'RSA-OAEP-256'
 })
 let parsedHekoPublicKey = JSON.parse(rawHekoPublicKey)
-let raw2IvString = "155,207,0,240,227,165,241,76,243,123,82,95,227,67,170,232"
+let raw2IvString = process.env.PUBLIC_IV //"236,67,122,52,35,109,70,65,43,74,215,168,207,157,156,241" // "155,207,0,240,227,165,241,76,243,123,82,95,227,67,170,232"
 let splitForHeko = raw2IvString.split(",")
 let ivArrayForHeko = new Uint8Array(splitForHeko.length)
 for (let i = 0; i < splitForHeko.length; i++) {
@@ -50,7 +49,7 @@ let rawHekoPrivateKey = JSON.stringify({
     alg: 'RSA-OAEP-256'
 })
 let parsedHekoPrivateKey = JSON.parse(rawHekoPrivateKey)
-let raw2IvString2 = "155,207,0,240,227,165,241,76,243,123,82,95,227,67,170,232"
+let raw2IvString2 = process.env.PRIVATE_IV //"121,19,199,207,80,18,86,123,194,37,83,178,136,31,189,196" //"155,207,0,240,227,165,241,76,243,123,82,95,227,67,170,232"
 let splitForHeko2 = raw2IvString2.split(",")
 let ivArrayForHeko2 = new Uint8Array(splitForHeko2.length)
 for (let i = 0; i < splitForHeko2.length; i++) {
@@ -314,7 +313,7 @@ function Mellow(message, max, current, buffer, callback) {
     return new Promise((resolve, reject) => {
         subtle.decrypt({
             name: "RSA-OAEP",
-            iv: ivArrayForHeko,
+            iv: ivArrayForHeko2,
         }, parsedHekoPrivateKey, messageTemp
         ).then(function (encrypted) {
             // console.log('This is the decrypted buffer: ', encrypted)
