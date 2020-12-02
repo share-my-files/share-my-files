@@ -1,16 +1,32 @@
-const PORT = process.env.PORT
-let INITIAL_API_ADDRESS = process.env.ADDRESS
-
-
 const http = require('http')
-// const https = require("https")
+const crypto = require('crypto');
+const { Console } = require('console');
 const server = http.createServer();
+const PORT = process.env.PORT || 7001;
 const subtle = require('crypto').webcrypto.subtle
-
+var sendToClient = "0"
+const RANDOM_DELAY = 2000
+const ARRAY_TIMERS = [400, 500, 600, 700, 800, 900, 1000] //[3000, 10000, 12000, 7000, 11000, 5000, 15000]  // [400, 500, 600, 700, 800, 900, 1000]
 server.on('request', HandleRequest)
 server.listen(PORT, ListenStart);
-const API_ADDRESS_HOST = INITIAL_API_ADDRESS.substr(8, INITIAL_API_ADDRESS.length)
-console.log(API_ADDRESS_HOST)
+// let INITIAL_API_ADDRESS = "https://e3db285c3243.ngrok.io"
+let INITIAL_API_ADDRESS = process.env.ADDRESS ||
+[
+    { "address" : "https://ab5d61f083ad.ngrok.io" , "usedCounter" : 0 , "startTime" : 0},
+    { "address" : "https://fa7a83b72246.ngrok.io" , "usedCounter" : 0 , "startTime" : 0},
+    { "address" : "https://de67bba8e3d8.ngrok.io" , "usedCounter" : 0 , "startTime" : 0},
+    { "address" : "https://ecfcfbe8ad9d.ngrok.io" , "usedCounter" : 0 , "startTime" : 0},
+    { "address" : "https://64b115b4e934.ngrok.io" , "usedCounter" : 0 , "startTime" : 0},
+    { "address" : "https://5d98de17e146.ngrok.io" , "usedCounter" : 0 , "startTime" : 0},
+    { "address" : "https://44dc43295eee.ngrok.io" , "usedCounter" : 0 , "startTime" : 0},
+    { "address" : "https://27e234b603b0.ngrok.io" , "usedCounter" : 0 , "startTime" : 0},
+    { "address" : "https://ba58b24d37c7.ngrok.io" , "usedCounter" : 0 , "startTime" : 0},
+    { "address" : "https://87a282e2a63c.ngrok.io" , "usedCounter" : 0 , "startTime" : 0},
+    ]
+
+// INITIAL_API_ADDRESS = JSON.parse(INITIAL_API_ADDRESS)
+// const API_ADDRESS_HOST = INITIAL_API_ADDRESS.substr(8, INITIAL_API_ADDRESS.length)
+// console.log(API_ADDRESS_HOST)
 
 
 let rawHekoPublicKey = JSON.stringify({
@@ -22,7 +38,7 @@ let rawHekoPublicKey = JSON.stringify({
     alg: 'RSA-OAEP-256'
 })
 let parsedHekoPublicKey = JSON.parse(rawHekoPublicKey)
-let raw2IvString = process.env.PUBLIC_IV //"236,67,122,52,35,109,70,65,43,74,215,168,207,157,156,241" // "155,207,0,240,227,165,241,76,243,123,82,95,227,67,170,232"
+let raw2IvString = process.env.PUBLIC_IV || "236,67,122,52,35,109,70,65,43,74,215,168,207,157,156,241" // "155,207,0,240,227,165,241,76,243,123,82,95,227,67,170,232"
 let splitForHeko = raw2IvString.split(",")
 let ivArrayForHeko = new Uint8Array(splitForHeko.length)
 for (let i = 0; i < splitForHeko.length; i++) {
@@ -49,7 +65,7 @@ let rawHekoPrivateKey = JSON.stringify({
     alg: 'RSA-OAEP-256'
 })
 let parsedHekoPrivateKey = JSON.parse(rawHekoPrivateKey)
-let raw2IvString2 = process.env.PRIVATE_IV //"121,19,199,207,80,18,86,123,194,37,83,178,136,31,189,196" //"155,207,0,240,227,165,241,76,243,123,82,95,227,67,170,232"
+let raw2IvString2 = process.env.PRIVATE_IV || "121,19,199,207,80,18,86,123,194,37,83,178,136,31,189,196" //"155,207,0,240,227,165,241,76,243,123,82,95,227,67,170,232"
 let splitForHeko2 = raw2IvString2.split(",")
 let ivArrayForHeko2 = new Uint8Array(splitForHeko2.length)
 for (let i = 0; i < splitForHeko2.length; i++) {
@@ -59,8 +75,28 @@ subtle.importKey("jwk", parsedHekoPrivateKey, { name: "RSA-OAEP", padding: "RSA_
     parsedHekoPrivateKey = kk;
 })
 
-
-
+var policyLimit = 0
+// setInterval(ClearThePolicyLimit, 70000)
+// function ClearThePolicyLimit() {
+//     console.log("Cleared the policy limit")
+//     policyLimit = 0
+//     for (let i = 0; i <= INITIAL_API_ADDRESS.length - 1; i++) {
+//         INITIAL_API_ADDRESS[i].usedCounter = 0
+//     }
+// }
+// setInterval(UpdateTheAddressTime, 1000)
+// function UpdateTheAddressTime() {
+//     // console.log("Updated The Address Time")
+//     for (let i = 0; i <= INITIAL_API_ADDRESS.length - 1; i++) {
+//         if ( INITIAL_API_ADDRESS[i].usedCounter > 0){
+//             INITIAL_API_ADDRESS[i].startTime += 1
+//             if(INITIAL_API_ADDRESS[i].startTime >= 60){
+//                 INITIAL_API_ADDRESS[i].usedCounter = 0
+//                 INITIAL_API_ADDRESS[i].startTime = 0
+//             }
+//         }
+//     }
+// }
 
 function HandleRequest(incomingMessage, response) {
     console.log("======Request Received======")
@@ -102,9 +138,9 @@ function HandleRequest(incomingMessage, response) {
             'Access-Control-Allow-Origin': `${req.headers.origin}`,
             'Access-Control-Allow-Credentials': true,
             'Access-Control-Allow-Headers': `${headersList}`,
-            'Access-Control-Allow-Methods': "POST",
+            'Access-Control-Allow-Methods': `${req.method}`,
             'Content-Type': "text/json",
-            'X-Powered-By': "MOO.JS",
+            'X-Powered-By': "OptionsServed.GoodJS",
         }
         res.writeHead(201, { ...object })
         res.end()
@@ -117,7 +153,111 @@ function HandleRequest(incomingMessage, response) {
         })
         req.on("end", function () {
             let substitutedReqObj = MakeSubstituteReqObject(req)
-            SendTheClientRequestToMainServer(substitutedReqObj, res, str)
+            // let timeDelay = Math.floor((Math.random() * ARRAY_TIMERS.length))
+            // timeDelay = ARRAY_TIMERS[timeDelay]
+            // timeDelay = timeDelay + Math.floor(Math.random() * RANDOM_DELAY)
+            // console.log("Time Delay: ", timeDelay)
+            // setTimeout((substitutedReqObj, res, str) => { SendTheClientRequestToMainServer(substitutedReqObj, res, str) }, timeDelay, substitutedReqObj, res, str)
+
+
+            CheckerForPolicyLimitOf20(substitutedReqObj, res, str)
+
+            function CheckerForPolicyLimitOf20(substitutedReqObj, res, str) {
+                let chosenObj = INITIAL_API_ADDRESS[policyLimit]
+                let chosenAddress = chosenObj.address
+                let chosenCounter = chosenObj.usedCounter
+                // console.log(chosenAddress, chosenCounter, "Of the unreliable one")
+                let foundOne = 1
+                if (INITIAL_API_ADDRESS[policyLimit].usedCounter > 19) {
+                    foundOne = 0
+                    if (policyLimit != INITIAL_API_ADDRESS.length - 1) {
+                        policyLimit++
+                        chosenObj = INITIAL_API_ADDRESS[policyLimit]
+                        if (INITIAL_API_ADDRESS[policyLimit].usedCounter < 19) {
+                            foundOne = 1
+                        }
+                        // for (let i = policyLimit + 1; i <= INITIAL_API_ADDRESS.length - 1; i++) {
+                        //     if (INITIAL_API_ADDRESS[i].usedCounter < 20) {
+                        //         chosenObj = INITIAL_API_ADDRESS[i]
+                        //         foundOne = 1
+                        //         policyLimit++
+                        //         break;
+                        //     }
+                        // }
+                    } else {
+                        policyLimit = 0;
+                        chosenObj = INITIAL_API_ADDRESS[policyLimit]
+                        if (INITIAL_API_ADDRESS[policyLimit].usedCounter < 19) {
+                            foundOne = 1;
+                        }
+                        // for (let i = 0; i <= INITIAL_API_ADDRESS.length - 1; i++) {
+                        //     if (INITIAL_API_ADDRESS[i].usedCounter < 20) {
+                        //         chosenObj = INITIAL_API_ADDRESS[i]
+                        //         foundOne = 1
+                        //         policyLimit = i
+                        //         break;
+                        //     }
+                        // }
+                    }
+                }
+                if (foundOne == 1) {
+                    // console.log("Inside it**************")
+                    chosenAddress = INITIAL_API_ADDRESS[policyLimit]["address"]
+                    chosenCounter = INITIAL_API_ADDRESS[policyLimit]["usedCounter"]
+                    console.log(chosenAddress, chosenCounter)
+                    INITIAL_API_ADDRESS[policyLimit].usedCounter = INITIAL_API_ADDRESS[policyLimit].usedCounter + 1
+                    if (INITIAL_API_ADDRESS[policyLimit]["usedCounter"] == 1) {
+                        setTimeout((policyLimit) => { INITIAL_API_ADDRESS[policyLimit].usedCounter = 0; console.log("Resetted the Add With ID: ", policyLimit) }, 61000, policyLimit)
+                    }
+                    SendTheClientRequestToMainServer(substitutedReqObj, res, str, INITIAL_API_ADDRESS[policyLimit]["address"])
+                } else {
+                    ErrorHandle("MAXIMUM POLICY LIMIT REACHED TIME TO UPGRADE", "1", substitutedReqObj, res)
+                }
+            }
+
+
+            // function CheckerForPolicyLimitOf20(substitutedReqObj, res, str) {
+            //     let random = Math.floor(Math.random() * 10)
+            //     let chosenObj = INITIAL_API_ADDRESS[random]
+            //     let chosenAddress = chosenObj.address
+            //     let chosenCounter = chosenObj.usedCounter
+            //     let foundOne = 1
+            //     if (chosenCounter > 19) {
+            //         foundOne = 0
+            //         for (let i = 0; i <= INITIAL_API_ADDRESS.length - 1; i++) {
+            //             if (INITIAL_API_ADDRESS[i].usedCounter < 20) {
+            //                 chosenObj = INITIAL_API_ADDRESS[i]
+            //                 foundOne = 1
+            //                 break;
+            //             }
+            //         }
+            //     }
+            //     if (foundOne == 1) {
+            //         chosenAddress = chosenObj.address
+            //         chosenCounter = chosenObj.usedCounter
+            //         chosenObj.usedCounter += chosenObj.usedCounter + 1
+            //         SendTheClientRequestToMainServer(substitutedReqObj, res, str, chosenAddress)
+            //     } else {
+            //         ErrorHandle("MAXIMUM POLICY LIMIT REACHED TIME TO UPGRADE", "1", substitutedReqObj, res)
+            //     }
+
+            //     // if (policyLimit > 19 && policyLimit < 40) {
+            //     //     policyLimit++
+            //     //     SendTheClientRequestToMainServer(substitutedReqObj, res, str, INITIAL_API_ADDRESS[1])
+            //     //     // setTimeout(CheckerForPolicyLimitOf20, 50, substitutedReqObj, res, str, INITIAL_API_ADDRESS[1])
+            //     // } else if (policyLimit > 39) {
+            //     //     if (policyLimit != 1000) {
+            //     //         console.log("Can't send the request to server as the policy limit has been exceeded!")
+            //     //     }
+            //     //     policyLimit = 1000;
+            //     //     setTimeout(CheckerForPolicyLimitOf20, 50, substitutedReqObj, res, str)
+            //     // }
+            //     // else {
+            //     //     policyLimit++
+            //     //     SendTheClientRequestToMainServer(substitutedReqObj, res, str, INITIAL_API_ADDRESS[0])
+            //     // }
+            // }
+            // SendTheClientRequestToMainServer(substitutedReqObj, res, str)
         })
     } else if (method == "GET") {
         let substitutedReqObj = MakeSubstituteReqObject(req)
@@ -132,7 +272,7 @@ function ErrorHandle(err, sendBack = "0", req = "", res = "") {
     console.log("Error:: ", err)
     if (sendBack != "0") {
         res.writeHead(200, { "stats": "error" })
-        res.write("404 Error")
+        res.write("keyError")
         res.end()
     }
 }
@@ -168,22 +308,25 @@ function ConverArrayBufferToString(decrypted) {
     }
     return string
 }
-function SendTheClientRequestToMainServer(originalRequest, originalResponse, body = "notDefined") {
+function SendTheClientRequestToMainServer(originalRequest, originalResponse, body = "notDefined", initialApiAddress) {
     let requestToSendToMainServer;
     if (body == "notDefined") {
         requestToSendToMainServer = JSON.stringify(originalRequest) + "*^*^*^" + "notDefined"
     } else {
         requestToSendToMainServer = JSON.stringify(originalRequest) + "*^*^*^" + body
     }
-
-    EncryptForHeko(requestToSendToMainServer, callMe)
-    function callMe(requestToSendToMainServer, err = "notDefined") {
+    // console.log(body, originalRequest.headers)
+    originalRequest = originalRequest
+    EncryptForHeko(requestToSendToMainServer, callMe, originalRequest, originalResponse)
+    function callMe(requestToSendToMainServer, err = "notDefined", originalRequest, originalResponse) {
         if (err != "notDefined") {
             console.log("Error At Heko Encrypt: ", err)
-            ErrorHandle(err, "1", req, originalResponse)
+            ErrorHandle(err, "1", originalRequest, originalResponse)
             return;
-        }
+        };
         let length = requestToSendToMainServer.length
+        let API_ADDRESS_HOST = initialApiAddress.substring(8, initialApiAddress.length)
+        // console.log(API_ADDRESS_HOST)
         let options = {
             host: `${API_ADDRESS_HOST}`,
             port: 80,
@@ -192,47 +335,99 @@ function SendTheClientRequestToMainServer(originalRequest, originalResponse, bod
             headers: { "accept": "application/json", "content-length": length }
         }
         // console.log("Destructued Options Made : ", { ...options })
-        var req = http.request({ ...options }, (response) => {
-            var receivedBody = ''
-            response.on('data', function (chunk) {
-                receivedBody += chunk
-            });
-
-            let origin = originalRequest.headers.origin
-            response.on('end', function () {
-                let splitMessages = receivedBody.split("^^**^^")
-                receivedTopHeaders = splitMessages[0]
-                receivedBottomBody = splitMessages[1]
-
-                DecryptForHeko(receivedTopHeaders, callMEE)
-                function callMEE(buffer, error = "") {
-                    if (error != "") { console.log(error); return; }
-
-                    let splittedMessages = buffer.split("^^**^^")
-                    let receivedStatusCode = splittedMessages[0].toString()
-                    let receivedHeaders = JSON.parse(splittedMessages[1])
-
-                    DecryptForHeko(receivedBottomBody, callMeAgain)
-                    function callMeAgain(buffer, error = "") {
-                        if (error != "") { console.log(error); return; }
-                        console.log("=======Handle Response======")
-                        // console.log("Origin: ", origin, "StatusCode: ", receivedStatusCode, "\n" + "Received Headers: ", JSON.stringify(receivedHeaders).substr(0, 5), "Received Body: ", receivedBody.substr(0, 20))
-                        console.log("Origin: ", origin, "StatusCode: ", receivedStatusCode, "\n" + "Received Headers: ", JSON.stringify(receivedHeaders).substr(0, 5))
-                       
-                        originalResponse.writeHead(receivedStatusCode, {
-                            ...receivedHeaders,
-                            'Access-Control-Allow-Origin': `${origin}`,
-                            'Access-Control-Allow-Methods': `${originalRequest.method}`,
-                        })
-                        originalResponse.write(buffer)
-                        originalResponse.end()
-                    }
+        let req = http.request({ ...options }, (response) => {
+            // console.log("Inside it")
+            CheckIt(response, originalRequest, originalResponse)
+            async function CheckIt(response, originalRequest, originalResponse) {
+                if (sendToClient == "1") {
+                    console.log("Busy so setting a timeout for it.")
+                    setTimeout(CheckIt, 0, response, originalRequest, originalResponse)
+                } else {
+                    sendToClient = "1";
+                    SendToTheClient(response, originalRequest, originalResponse)
                 }
-            })
+            }
+            function SendToTheClient(response, originalRequest, originalResponse) {
+                // let originalRequest = originalRequest
+                response.on('error', (error) => {
+                    console.log('Error:: While Receiving The Request From -> ', INITIAL_API_ADDRESS, error);
+                    originalResponse.end()
+                })
+                console.log("=======Handle Response======")
+                let receivedBody = ''
+                let i = 0;
+                response.on('data', function (chunk) {
+                    i++
+                    // console.log(i, end = "")
+                    receivedBody += chunk
+                    // if (chunk.toString()[chunk.length - 1] == ">") {
+                    // if (receivedBody.toString().length > 4000) {
+                    // console.log("Received the last chunk : ", chunk.length)
+                    // runAtEnd()
+                    // }
+                });
+
+                let origin = originalRequest.headers.origin
+                response.on('end', function () { //})
+                    // function runAtEnd() {
+                    // let originalRequest = originalRequest
+                    try {
+                        receivedBody = receivedBody.toString().substring(0, receivedBody.length - 1)
+                        let splitMessages = receivedBody.split("^^**^^")
+                        // console.log("split messages" , splitMessages.toString().substring(0 , 20)) // IMPORTANT THIS TOLD US ABOUT THE POLICY LIMIT OF 20 AS THAT PROXY WAS IMPLEMENTING A HTML RESPONSE TO NOTIFY US ABOUT HTE PLICY AND THUS WE FAILED TO PARSE OR SPLIT THE MESSAGES BELOW
+                        receivedTopHeaders = splitMessages[1]
+                        let newSplitMessages = receivedBody.split("**&&**")
+                        receivedBottomBody = newSplitMessages[1]
+                        // console.log("End Chunk At: ", i)
+                        // console.log("Inside End ", receivedTopHeaders.toString().substring(0, 5), "Length : ", receivedBody.length)
+                        // console.log("Inside End ", receivedBottomBody.toString().substring(0, 5))
+                        DecryptForHeko(receivedTopHeaders, callMEE, originalRequest, originalResponse)
+                        function callMEE(buffer, error = "", originalRequest, originalResponse) {
+                            if (error != "") { console.log(error); return; }
+                            // let originalRequest = originalRequest
+                            let splittedMessages;
+                            let receivedStatusCode;
+                            let receivedHeaders;
+                            try {
+                                splittedMessages = buffer.split("^^**^^")
+                                receivedStatusCode = splittedMessages[0].toString()
+                                receivedHeaders = JSON.parse(splittedMessages[1])
+                            } catch (error) {
+                                ErrorHandle(err, "1", originalRequest, originalResponse)
+                            }
+                            DecryptForHeko(receivedBottomBody, callMeAgain, originalRequest, originalResponse)
+                            function callMeAgain(buffer, error = "", originalRequest, originalResponse) {
+                                if (error != "") { console.log(error); return; }
+                                // console.log("=======Handle Response======")
+                                // console.log("Origin: ", origin, "StatusCode: ", receivedStatusCode, "\n" + "Received Headers: ", JSON.stringify(receivedHeaders).substr(0, 5), "Received Body: ", receivedBody.substr(0, 20))
+                                // console.log("Origin: ", origin, "StatusCode: ", receivedStatusCode, "\n" + "Received Headers: ", JSON.stringify(receivedHeaders).substring(0, 5))
+                                console.log("Origin: ", origin, "StatusCode: ", receivedStatusCode, "\n" + "Sending Body: ", buffer.substring(0, 50))
+                                originalResponse.writeHead(receivedStatusCode, {
+                                    ...receivedHeaders,
+                                    'Access-Control-Allow-Origin': `${origin}`,
+                                    'Access-Control-Allow-Methods': `${originalRequest.method}`,
+                                })
+                                originalResponse.write(buffer)
+                                originalResponse.end()
+                                sendToClient = "0"
+                            }
+                        }
+                    } catch (error) {
+                        sendToClient = "0"
+                        // response.destroy()
+                        console.log("ERROR:: Usual Input Stream Error", error)
+                        ErrorHandle("Request Method Not Supported", "1", req, originalResponse)
+                        // originalResponse.end()
+                        return;
+                    }
+                    // }
+                })
+            }
         }
         )
         req.on('error', (error) => {
-            console.log('Error:: While Sending The Request To -> ', INITIAL_API_ADDRESS, error);
+            console.log('Error:: While Sending The Request To -> ', initialApiAddress, error);
+            ErrorHandle("Request Method Not Supported", "1", req, originalResponse)
         })
         requestToSendToMainServer = requestToSendToMainServer.toString()
         req.write(requestToSendToMainServer)
@@ -255,100 +450,59 @@ function MakeSubstituteReqObject(req) {
 }
 
 
-
-function Hellow(message, max, current, buffer, callback) {
-    let messageLength = message.length
-    let testerLength = (current * 100) + 100
-    if (testerLength > messageLength) { messageLength = messageLength }
-    else { messageLength = testerLength }
-    // let messageTemp = message.substr(current * 100, messageLength) //IMPORTANT Due to some reasons he is not slicing the string into fixed length of 100 digits or chars, maybe it has some trick, So we used substring() which works perfectly , this was also the reason why padding was failing due to size.
-    // messageTemp = message.substr(current * 200, (current * 200) + 200)
-    let messageTemp = message.substring(current * 100, messageLength)
-    return new Promise((resolve, reject) => {
-        subtle.encrypt({
-            name: "RSA-OAEP",
-            iv: ivArrayForHeko,
-        }, parsedHekoPublicKey, StringToTypedArray(messageTemp)
-        ).then(function (encrypted) {
-            let sendingThing = new Uint8Array(encrypted).toString()
-            buffer += sendingThing
-            current += 1
-            let updatedBuffer = buffer;
-            // console.log("Message Temp :", messageTemp.length , "Total Length :" ,updatedBuffer.length, "Last Data :", updatedBuffer[updatedBuffer.length -1],  current -1 ,  "/", max)
-            messageTemp = ""
-            if (current < max) {
-                Hellow(message, max, current, "", callback).then(buff => {
-                    updatedBuffer = updatedBuffer + "^*^*" + buff
-                    // console.log(updatedBuffer.substr(0, 20),"Last Data :", updatedBuffer[updatedBuffer.length -1],  current -1 , "/", max)
-                    resolve(updatedBuffer)
+async function EncryptForHeko(message, callback, originalRequest, originalResponse) {
+    message = message + "^^***^^^"
+    message = StringToTypedArray(message)
+    subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"])
+        .then(key => {
+            let iv = crypto.randomBytes(16);
+            iv = new Uint8Array(iv)
+            // console.log("First IV: ", iv)
+            subtle.encrypt({ name: "AES-GCM", iv: iv }, key, message).then(encrypted => {
+                subtle.exportKey("raw", key).then(exportedKey => {
+                    let valueToEncrypt = iv.toString() + "^***^" + new Uint8Array(exportedKey).toString()
+                    // console.log("These are the encryption data: ", valueToEncrypt)
+                    subtle.encrypt({
+                        name: "RSA-OAEP",
+                        iv: ivArrayForHeko,
+                    }, parsedHekoPublicKey, StringToTypedArray(valueToEncrypt)
+                    ).then(function (encryptedKeys) {
+                        encrypted = new Uint8Array(encrypted).toString()
+                        encrypted = encrypted + "^***^" + new Uint8Array(encryptedKeys).toString()
+                        callback(encrypted, "notDefined", originalRequest, originalResponse)
+                    })
                 })
-            } else {
-                resolve(updatedBuffer)
-            }
-        }).catch(function (err) {
-            console.error(err);
-            callback("", err)
-            reject();
+            })
+        })
+}
+async function DecryptForHeko(message, callback, originalRequest, originalResponse) {
+    // console.log("Inside Decrypt ", message.toString().substring(0, 5))
+    let messagess = message.split("^***^")
+    let message0 = messagess[0]
+    let message1 = messagess[1]
+    let messageBody = RawArrayStringToTypedArray(message0)
+    let encryptedData = RawArrayStringToTypedArray(message1)
+    // console.log("Message: ", messageBody)
+    // console.log("Encrypted Data: ", encryptedData.toString())
+    subtle.decrypt({
+        name: "RSA-OAEP",
+        iv: ivArrayForHeko2,
+    }, parsedHekoPrivateKey, encryptedData
+    ).then(function (data) {
+        data = ConverArrayBufferToString(new Uint8Array(data))
+        // console.log("Data After RSA decryption: ", data)
+        data = data.split("^***^")
+        let iv = RawArrayStringToTypedArray(data[0])
+        let rawKey = RawArrayStringToTypedArray(data[1])
+        subtle.importKey("raw", rawKey, "AES-GCM", true, ["encrypt", "decrypt"]).then(key => {
+            subtle.encrypt({ name: "AES-GCM", iv: iv }, key, messageBody).then(encrypted => {
+                messageBody = ConverArrayBufferToString(new Uint8Array(encrypted))
+                messageBody = messageBody.split("^^***^^^")[0]
+                // callback(messageBody)
+                callback(messageBody, "", originalRequest, originalResponse)
+                // console.log("Decrypted Message: ", messageBody)
+                // console.log("Splitted Decrypted Message", messageBody.split( "^^***^^^" )[0])
+            })
         })
     })
-}
-function EncryptForHeko(message, callback) {
-    let actualQ = (message.length) / 100
-    let floor = Math.floor(actualQ)
-    if (actualQ > floor) { actualQ += 1 }
-    actualQ = Math.floor(actualQ)
-    let starter = 0
-    let buffer = ""
-    // console.log("Message : ", message.substr(0, 10), starter, "/", actualQ, "Message Length: ", message.length, callback)
-
-    Hellow(message, actualQ, starter, buffer, callback)
-        .then((buffer) => {
-            callback(buffer)
-        })
-}
-function Mellow(message, max, current, buffer, callback) {
-    messageTemp = message.split("^*^*")[current]
-    messageTemp = RawArrayStringToTypedArray(messageTemp)
-    // console.log("Message Temp: ", current,  messageTemp)
-    return new Promise((resolve, reject) => {
-        subtle.decrypt({
-            name: "RSA-OAEP",
-            iv: ivArrayForHeko2,
-        }, parsedHekoPrivateKey, messageTemp
-        ).then(function (encrypted) {
-            // console.log('This is the decrypted buffer: ', encrypted)
-            let sendingThing = new Uint8Array(encrypted)
-            // console.log("This is the decrypted uint8Array: ", sendingThing)
-            sendingThing = ConverArrayBufferToString(sendingThing)
-            // console.log("This is the decrypted string: " ,sendingThing)
-            buffer += sendingThing
-            current += 1
-            let updatedBuffer = buffer;
-            // console.log(updatedBuffer.substr(0, 20), "Last Data :", updatedBuffer[updatedBuffer.length - 1], current - 1, "/", max)
-            if (current < max) {
-                Mellow(message, max, current, "", callback).then(buff => {
-                    updatedBuffer = updatedBuffer + buff
-                    // console.log(updatedBuffer.substr(0, 20), "Last Data :", updatedBuffer[updatedBuffer.length - 1], current - 1, "/", max)
-                    resolve(updatedBuffer)
-                })
-            } else {
-                resolve(updatedBuffer)
-            }
-            // callback(updatedBuffer, "");
-        }).catch(function (err) {
-            console.error(err);
-            callback("", err)
-            reject()
-        })
-    })
-}
-function DecryptForHeko(message, callback) {
-    let actualQ = message.split("^*^*").length
-    let starter = 0
-    let buffer = ""
-    // console.log("Starting Message : ", message.substr(0, 10), starter, "/", actualQ, buffer, callback)
-    Mellow(message, actualQ, starter, buffer, callback)
-        .then((buffer) => {
-            callback(buffer)
-        })
 }
